@@ -257,17 +257,22 @@
             msg.innerText = "Connecting to Secure Server via Proxy...";
             logSystem("Handshake initiated with Pastebin...");
 
-            try {
-                // MENGGUNAKAN PROXY UNTUK BYPASS CORS DI GITHUB PAGES
-                // Kita menggunakan allorigins.win sebagai perantara
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(PASTEBIN_URL)}&disableCache=true`;
+                        try {
+                // --- UPDATE: MENGGUNAKAN PROXY YANG LEBIH STABIL ---
+                // Kita gunakan corsproxy.io karena lebih cepat
+                const proxyUrl = `https://corsproxy.io/?` + encodeURIComponent(PASTEBIN_URL);
                 
                 const response = await fetch(proxyUrl);
                 if (!response.ok) throw new Error("Server Unreachable");
                 
-                const realPassword = (await response.text()).trim();
+                // Pastebin kadang mengembalikan HTML jika error, kita pastikan teks
+                const text = await response.text();
+                const realPassword = text.trim();
 
-                setTimeout(() => { // Delay buatan biar terlihat canggih "loading"
+                // Debugging: Cek di Console browser (F12) apa isinya
+                console.log("Password dari Server:", realPassword); 
+
+                setTimeout(() => { 
                     if (input === realPassword) {
                         isAuthenticated = true;
                         document.getElementById('login-overlay').classList.add('animate__fadeOut');
@@ -285,12 +290,8 @@
                 }, 1500);
 
             } catch (error) {
-                btn.style.display = 'block';
-                loader.style.display = 'none';
-                msg.innerText = "Connection Error: Check Pastebin URL or Internet.";
-                console.error(error);
-            }
-        }
+                // ... (sisanya sama)
+
 
         // --- SCANNER LOGIC (Kunci untuk GitHub Pages) ---
         // Karena tidak ada PHP, kita "Brute Force" cek keberadaan file 1.jpg, 2.jpg, dst.
